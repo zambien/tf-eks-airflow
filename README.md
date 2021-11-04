@@ -6,12 +6,22 @@ I wanted to compare MWAA and a custom built Airflow stack on EKS to understand t
 - [x] Stand up Airflow using kind per the Airflow instructions: https://airflow.apache.org/docs/helm-chart/stable/quick-start.html 
 - [x] Customize the install per those instructions with something that makes sense for my planned use
 - [x] Tinker with that running system to learn more
-- [ ] Stand up a similar system using the helm chart on AWS with EKS
+- [x] Stand up a similar system using the helm chart on AWS with EKS using helm and/or terraform
 - [ ] Modify the AWS system to be closer to how we would actually run it in production
 - [ ] Continue to tweak and tune, send stats to Prometheus, test Flower vs the k8s runner, etc.
 - [ ] Create a workflow to get dags from Git into Airflow somehow (Git to S3)
 
 The goal being to come away with a good idea of whether it makes sense to roll your own Airflow or to just use MWAA and to do some learning and share some code in the process.
+
+## Prereqs
+
+Prior to starting you should have the following installed:
+
+* kubectl
+* Helm (3)
+* awscli
+* kind
+* terraform
 
 ## Kind Setup
 
@@ -101,8 +111,104 @@ terraform plan
 terraform apply
 ```
 
-Configure kubectl: `aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)
-`
+Configure kubectl: `aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)`
 
 Optionally you may choose to install the kubernetes console as described in https://learn.hashicorp.com/tutorials/terraform/eks#deploy-and-access-kubernetes-dashboard.
+
+## Deploy Airflow on EKS manually
+
+First let's do a deployment on EKS manually using kubectl.  We will do a lot of the same things that we did with kind... which makes sense because it is all k8s!
+
+```bash
+{
+    export NAMESPACE=airflow-namespace
+    export RELEASE_NAME=airflow-v1
+    kubectl create namespace $NAMESPACE
+}
+```
+
+Then we will start airflow in EKS this time with the example dags so we have something to play around with:
+
+```bash
+helm repo add apache-airflow https://airflow.apache.org
+helm repo update
+helm install $RELEASE_NAME apache-airflow/airflow \
+  --namespace $NAMESPACE \
+  --set 'env[0].name=AIRFLOW__CORE__LOAD_EXAMPLES,env[0].value=True'
+```
+
+Once again we can look at the status:
+```bash
+kubectl get pods --namespace $NAMESPACE
+helm list --namespace $NAMESPACE
+```
+
+Once everything is running we can connect port forward to the EKS web server as follows:
+
+```bash
+export WEBSERVER_POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=webserver,tier=airflow" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward --namespace $NAMESPACE $WEBSERVER_POD_NAME 8080:8080
+```
+
+If you want to connect to the Kubernetes admin console:
+
+```bash
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep service-controller-token | awk '{print $1}')
+```
+
+And then you can `kubectl proxy` to get to the console with the token.
+
+Well that was pretty nifty but I guess we'd rather not have to type in a bunch of commands to deploy. Let's tear down our airflow deployment but leave EKS running.
+
+`helm uninstall $RELEASE_NAME -n $NAMESPACE`
+
+Verify that everything is gone...
+
+`kubectl get pods --namespace $NAMESPACE`
+
+And once it is we can remove the namespace we created:
+
+`kubectl delete namespace $NAMESPACE`
+
+Alright, all cleaned up. Now let's deploy Airflow with Terraform
+
+## Deploy Airflow with Terraform
+
+Change directory to the airflow folder under terraform:
+
+`cd terraform/airflow`
+
+Now run the terraform
+
+```bash
+terraform init
+terraform plan
+# review the plan
+terraform apply
+```
+
+We can watch everything come up as we have been:
+
+```bash
+kubectl get pods --namespace $NAMESPACE
+```
+
+We can port forward as we did before:
+
+```bash
+export WEBSERVER_POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward --namespace $NAMESPACE $WEBSERVER_POD_NAME 8080:8080
+```
+
+## Cleanup
+
+We don't want to leave our AWS resources or even kind configured as we shouldn't waste resources or money.  Below find how to clean everything up.
+
+### kind
+
+To remove our kind resources, simply run `kind delete clusters kind`
+
+### AWS
+
+If we simply want to kill everything with fire we can run a destroy on the EKS cluster. The separate folder with airflow only creates resources within EKS so deleting EKS will fully cleanup our resources.
 
