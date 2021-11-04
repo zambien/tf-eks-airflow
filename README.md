@@ -86,3 +86,23 @@ helm upgrade $RELEASE_NAME apache-airflow/airflow --namespace $NAMESPACE \
 You can run `kubectl get pods --namespace $NAMESPACE` in another window to see the progress and when done check the web console again.
 
 That's it for the kind setup.  There is a lot you can dig into here but this is a good place to start to get familiar with k8s and Airflow.
+
+## Terraform
+
+For the base EKS cluster, I the terraform from this repo: https://github.com/hashicorp/learn-terraform-provision-eks-cluster
+
+First we will spin up the EKS cluster.
+
+```bash
+cd terraform/eks
+terraform init
+terraform plan
+# review the plan
+terraform apply
+```
+
+Configure kubectl: `aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)
+`
+
+Optionally you may choose to install the kubernetes console as described in https://learn.hashicorp.com/tutorials/terraform/eks#deploy-and-access-kubernetes-dashboard.
+
