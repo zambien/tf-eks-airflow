@@ -34,3 +34,4 @@ override.tf.json
 
 kubeconfig_education-*
 metrics-server*
+*.tfvars

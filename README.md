@@ -97,7 +97,7 @@ You can run `kubectl get pods --namespace $NAMESPACE` in another window to see t
 
 That's it for the kind setup.  There is a lot you can dig into here but this is a good place to start to get familiar with k8s and Airflow.
 
-## Terraform
+## Terraform EKS setup
 
 For the base EKS cluster, I the terraform from this repo: https://github.com/hashicorp/learn-terraform-provision-eks-cluster
 
@@ -199,6 +199,25 @@ We can port forward as we did before:
 export WEBSERVER_POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
 kubectl port-forward --namespace $NAMESPACE $WEBSERVER_POD_NAME 8080:8080
 ```
+
+## Terraform on kind
+
+Perhaps you don't want to use EKS and spend your hard earned money learning. Hey, I don't blame you.  Terraform any Kubernetes provider!  So let's give that a shot with kind.
+
+You will want yq for this exercise: https://github.com/mikefarah/yq#install
+
+Create the kind cluster for use by Terraform and set kubectl to use it:
+
+```bash
+cd terraform/kind
+kind create cluster --name airflow --config kind-config.yaml
+kubectl cluster-info --context kind-airflow
+```
+
+
+
+
+
 
 ## Cleanup
 
