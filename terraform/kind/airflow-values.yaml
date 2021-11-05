@@ -1,0 +1,10 @@
+postgresql:
+  enabled: false
+data:
+  metadataConnection:
+    user: postgres
+    pass: itsnotasecret
+    protocol: postgresql
+    host: db-postgresql
+    port: 5432
+    db: airflow

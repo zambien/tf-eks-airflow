@@ -13,3 +13,23 @@ variable "client_key" {
 variable "cluster_ca_certificate" {
   type = string
 }
+
+variable "namespace" {
+  type = string
+  default = "default"
+}
+
+variable "postgres_db" {
+  type = string
+  default = "airflow"
+}
+
+variable "postgres_name" {
+  type = string
+  default = "db"
+}
+
+variable "postgres_pass" {
+  type = string
+  default = "itsnotasecret"
+}
