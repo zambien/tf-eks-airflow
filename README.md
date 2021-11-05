@@ -113,7 +113,7 @@ terraform apply
 
 Configure kubectl: `aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)`
 
-Optionally you may choose to install the kubernetes console as described in https://learn.hashicorp.com/tutorials/terraform/eks#deploy-and-access-kubernetes-dashboard.
+Optionally you may choose to install the kubernetes console as described in https://learn.hashicorp.com/tutorials/terraform/eks#deploy-and-access-kubernetes-dashboard
 
 ## Deploy Airflow on EKS manually
 
@@ -209,11 +209,46 @@ You will want yq for this exercise: https://github.com/mikefarah/yq#install
 Create the kind cluster for use by Terraform and set kubectl to use it:
 
 ```bash
-cd terraform/kind
-kind create cluster --name airflow --config kind-config.yaml
-kubectl cluster-info --context kind-airflow
+{
+  cd terraform/kind
+  kind create cluster --name airflow --config kind-config.yaml
+  kubectl cluster-info --context kind-airflow
+}
 ```
 
+Now create our tfvars so that terraform can know how to talk to the cluster
+
+`./create_tfvars.sh`
+
+finally, deploy
+
+`terraform init && terraform apply`
+
+If you want to check the progress of the deployment you could run the following in another window:
+
+```bash
+while true;do;kubectl get pods -A;sleep 5;clear;done
+```
+
+If you check your pods you will notice that airflow and the k8s dashboard is deployed. You can get your login token the same way as before:
+
+```bash
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep service-controller-token | awk '{print $1}')
+kubectl proxy
+```
+
+To hit the k8s dashboard:
+http://localhost:8001/api/v1/namespaces/default/services/https:kubernetes-dashboard:https/proxy/#/role?namespace=default
+
+Airflow:
+
+We can port forward as we did before:
+
+```bash
+export NAMESPACE="airflow"
+export WEBSERVER_POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward --namespace $NAMESPACE $WEBSERVER_POD_NAME 8080:8080
+```
 
 
 

@@ -14,12 +14,13 @@ resource "helm_release" "airflow" {
   name       = "airflow"
   repository = "https://airflow-helm.github.io/charts"
   chart      = "airflow"
-  namespace  = "airflow"
+  namespace  = kubernetes_namespace.airflow.id
 
+  /*
   set {
     name  = "AIRFLOW__CORE__LOAD_EXAMPLES"
     value = "True"
-  }
+  }*/
   
   /* TBD
   values = [
