@@ -204,23 +204,7 @@ kubectl port-forward --namespace $NAMESPACE $WEBSERVER_POD_NAME 8080:8080
 
 `Warning:  I have found the helm_release module to be very buggy especially on the kind provider. Don't use it.  I will leave this section here for posterity.`
 
-Perhaps you don't want to use EKS and spend your hard earned money learning. Hey, I don't blame you.  Terraform any Kubernetes provider!  So let's give that a shot with kind.
-
-Create the kind cluster for use by Terraform and set kubectl to use it:
-
-```bash
-{
-  cd terraform/kind
-  kind create cluster --name airflow --config kind-config.yaml
-  kubectl cluster-info --context kind-airflow
-}
-```
-
-Now create our tfvars so that terraform can know how to talk to the cluster
-
-`./create_tfvars.sh`
-
-finally, deploy
+Simply run init and apply.
 
 `terraform init && terraform apply`
 

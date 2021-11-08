@@ -19,6 +19,11 @@ variable "namespace" {
   default = "default"
 }
 
+variable "airflow_name" {
+  type = string
+  default = "airflow"
+}
+
 variable "postgres_db" {
   type = string
   default = "airflow"

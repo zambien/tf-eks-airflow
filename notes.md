@@ -21,7 +21,7 @@ Run postgres
 
 ```bash
 helm install db \
-  --set postgresqlPassword=secretpassword,postgresqlDatabase=airflow \
+  --set postgresqlPassword=itsnotasecret,postgresqlDatabase=airflow \
     bitnami/postgresql
 ```
 

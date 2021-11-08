@@ -1,16 +1,16 @@
 provider "kubernetes" {
-    host                   = var.host
-    client_certificate     = base64decode(var.client_certificate)
-    client_key             = base64decode(var.client_key)
-    cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
+    host                   = resource.kind_cluster.default.endpoint
+    client_certificate     = resource.kind_cluster.default.client_certificate
+    client_key             = resource.kind_cluster.default.client_key
+    cluster_ca_certificate = resource.kind_cluster.default.cluster_ca_certificate
 }
 
 provider "helm" {
   kubernetes {
-    host                   = var.host
-    client_certificate     = base64decode(var.client_certificate)
-    client_key             = base64decode(var.client_key)
-    cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
+    host                   = resource.kind_cluster.default.endpoint
+    client_certificate     = resource.kind_cluster.default.client_certificate
+    client_key             = resource.kind_cluster.default.client_key
+    cluster_ca_certificate = resource.kind_cluster.default.cluster_ca_certificate
   }
 }
 
@@ -41,13 +41,13 @@ data "template_file" "airflow_values" {
 }
 
 resource "helm_release" "airflow" {
-  name       = "airflow"
+  name       = var.airflow_name
   repository = "https://airflow.apache.org"
-  chart      = "airflow"
+  chart      = var.airflow_name
   namespace  = var.namespace
-  timeout    = 90
+  timeout    = 120
   lint       = true
-
+/*
   set {
     name    = "env[0].name"
     value   = "AIRFLOW__CORE__LOAD_EXAMPLES"
@@ -59,6 +59,7 @@ resource "helm_release" "airflow" {
   }
 
   values = [
-    "${file("${path.module}/airflow-values.yaml")}"
-  ]  
+    "${file("airflow-values.yaml")}"
+  ]
+*/
 }

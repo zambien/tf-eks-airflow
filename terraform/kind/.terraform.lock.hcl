@@ -53,3 +53,15 @@ provider "registry.terraform.io/hashicorp/template" {
     "zh:c979425ddb256511137ecd093e23283234da0154b7fa8b21c2687182d9aea8b2",
   ]
 }
+
+provider "registry.terraform.io/kyma-incubator/kind" {
+  version     = "0.0.10"
+  constraints = "0.0.10"
+  hashes = [
+    "h1:fGg/XSL9D+c/sAaF4YBm8VXup/Rfk5PhJlKdRv38bSI=",
+    "zh:00d1cd4e704b7b25ed6c6009e33d88b88f80bd8b9c78621e1354354705d60830",
+    "zh:4fa323e060c66a8472d397d2b4a2276b88647def9e9107984515e7055213c6c7",
+    "zh:d7dbc214ebf0343f6ac41886780a3f61c9efe0b357b7e1d227bb24ba1fb5e7b2",
+    "zh:f090c561e3d142d531edb62d6d3c51b29f88ebe9c4c91105f3c48a0d17bd8f14",
+  ]
+}
