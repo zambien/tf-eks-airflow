@@ -47,7 +47,7 @@ resource "helm_release" "airflow" {
   namespace  = var.namespace
   timeout    = 120
   lint       = true
-/*
+
   set {
     name    = "env[0].name"
     value   = "AIRFLOW__CORE__LOAD_EXAMPLES"
@@ -61,5 +61,5 @@ resource "helm_release" "airflow" {
   values = [
     "${file("airflow-values.yaml")}"
   ]
-*/
+
 }
