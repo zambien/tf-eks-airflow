@@ -202,9 +202,9 @@ kubectl port-forward --namespace $NAMESPACE $WEBSERVER_POD_NAME 8080:8080
 
 ## Terraform on kind
 
-Perhaps you don't want to use EKS and spend your hard earned money learning. Hey, I don't blame you.  Terraform any Kubernetes provider!  So let's give that a shot with kind.
+`Warning:  I have found the helm_release module to be very buggy especially on the kind provider. Don't use it.  I will leave this section here for posterity.`
 
-You will want yq for this exercise: https://github.com/mikefarah/yq#install
+Perhaps you don't want to use EKS and spend your hard earned money learning. Hey, I don't blame you.  Terraform any Kubernetes provider!  So let's give that a shot with kind.
 
 Create the kind cluster for use by Terraform and set kubectl to use it:
 
